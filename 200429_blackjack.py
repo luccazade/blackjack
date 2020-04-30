@@ -10,7 +10,7 @@ logging.basicConfig(filename='blackjackLogFile.txt', level=logging.DEBUG, format
 #logging.disable(logging.CRITICAL)
 
 # Begin the program
-logging.debug('Start of program')
+logging.debug('****Start of program****')
 
 # Blackjack odds
 
@@ -40,7 +40,22 @@ numbers = {
     13: 'King'
     }
 
+scores = {
+    'Ace': 1,
+    'King': 10,
+    'Queen': 10,
+    'Jack': 10
+}
+
+for i in range(1,11):
+    scores[str(i)] = i
+logging.debug('Scores assigned are %s' % (scores))
+
 dealtCards = {}
+currentScores = {
+    'player': 0,
+    'dealer': 0
+}
 
 # Randomise being given a card
 
@@ -68,7 +83,9 @@ def first_round():
             cardsFirstRound[i][2] = draw_card()
         cardsFirstRound[i][0] = [cardsFirstRound[i][1], cardsFirstRound[i][2]]
         dealtCards[person] = cardsFirstRound[i][1:]
+        currentScores[person] = scores[dealtCards[person][0][0]] + scores[dealtCards[person][1][0]]
         logging.debug(person + '\'s hand returned is %s' % (dealtCards[person]))
+        logging.debug(person + '\'s hand score is %s' % (currentScores[person]))
         logging.debug('Cards dealt so far are %s' % (dealtCards))
     return dealtCards
 
@@ -79,38 +96,14 @@ print('The dealer\'s hand is a ' + str(dealtCards['dealer'][0]) + ' and a covere
 
 
 # add up the total
-import re
-
-numberRegex = re.compile(r'\d{1,2}')
-faceRegex = re.compile(r'\d{4,}')
-aceRegex = re.compile(r'\d{3}')
-
-cardRegex = re.compile(r'''
-
-(\d{1,2} | \w{4,} | \w{3}) # Numbers or Faces or Ace
-\sof\s # of part
-\w{5,} # suits part
-
-''',re.VERBOSE)
 
 def add_up(number):
-    total = 0
-    for i in range(number):
-        logging.debug('Adding up over %s cards in the hand' % (i+1))
-        value = cardRegex.search(hand[i])
-        logging.debug('Card that is being valued is %s' % (hand[i]))
-        if value.group(1) in ['Jack', 'Queen', 'King']:
-            numberVal = 10
-        elif value.group(1) == 'Ace':
-            numberVal = 1
-        else:
-            numberVal = int(value.group(1))
-        total = total + numberVal
-        logging.debug('Total after %s cards is %s' % (i+1, total))
-    logging.debug('Total returned is %s' % (total))
-    if total > 21:
-        print('Unlucky pal, you\'re BUST!')
-    return total
+    for n in currentScores.keys():
+        logging.debug('Person assigned is %s' % (n))
+        startScore = currentScores[n]
+        for i in range(number):
+            currentScores[n] = currentScores[n] + scores[dealtCards[n][i][0]]
+        logging.debug('%s score is %s' % (n, currentScores[n]))
 
 add_up(2)
 
