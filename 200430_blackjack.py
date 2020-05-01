@@ -27,8 +27,7 @@ suits = {
 }
 
 numbers = {
-    0: 'Ace',
-    1: '1',
+    1: 'Ace',
     2: '2',
     3: '3',
     4: '4',
@@ -44,7 +43,7 @@ numbers = {
 }
 
 scores = {
-    'Ace': 1,
+    'Ace': [1, 11],
     'King': 10,
     'Queen': 10,
     'Jack': 10
@@ -75,7 +74,7 @@ responses = {
 def draw_card():
     suit = suits[random.randrange(4)]
     global number
-    number = numbers[random.randrange(14)]
+    number = numbers[random.randrange(1, 14)]
     card = str(number) + ' of ' + suit
     while card in dealtCards:
         draw_card()
@@ -118,7 +117,7 @@ def first_round():
 first_round()
 
 print('Your hand is: ' + dealtCards['player'][0] +
-      ' and ' + dealtCards['player'][1])
+      ' and a ' + dealtCards['player'][1])
 print('The dealer\'s hand is a ' + str(dealtCards['dealer'][0]) +
       ' and a covered card')
 
@@ -154,7 +153,7 @@ def ask_next(turn):
         print('You hand is now ' + str(dealtCards['player']) +
               ' with a value of ' + str(currentScores['player']))
         if currentScores['player'] > 21:
-            print('Aw shit! You\'re bust!')
+            print('Aw shit! You\'re bust! You lose this round')
         else:
             ask_next(turn + 1)
     else:
@@ -166,6 +165,37 @@ turnNumber = len(dealtCards['player'])
 
 ask_next(turnNumber)
 
-# TODO: Decide what the computer has to do
+print('Dealer now reveals their hand: ' + str(dealtCards['dealer'][0]) +
+      ' and a ' + str(dealtCards['dealer'][1]))
 
-# TODO: show the odds of stick or hit for you
+
+def dealer(turn):
+    if currentScores['dealer'] > 21:
+        print('Dealer is bust!')
+        print('You win this round!')
+    elif currentScores['dealer'] in range(17, 22):
+        print('Dealer must stick')
+        print('Dealer\'s final hand is %s' % (dealtCards['dealer']))
+    else:
+        print('Dealer\'s hand is less than 17. Dealer must draw a card...')
+        dealtCards['dealer'].append(draw_card())
+        print('Dealer drew a ' + dealtCards['player'][turn - 1])
+        currentScores['dealer'] += scores[number]
+        print('Dealer\'s score is %s' % (currentScores['dealer']))
+        turn += 1
+        dealer(turn)
+
+
+dealer(2)
+
+
+def check_scores():
+    if currentScores['player'] > currentScores['dealer']:
+        print('Congratulations! You win!')
+    elif currentScores['player'] == currentScores['dealer']:
+        print('A tie!')
+    else:
+        print('Oof, you lose ya big donkey!')
+
+
+check_scores()
